@@ -57,7 +57,7 @@ public class Physics2D extends Canvas {
 	// Loopa programmet
 	public void run() {
 		long lastLoopTime = System.nanoTime();
-		final int TARGET_FPS = 10;
+		final int TARGET_FPS = 60;
 		final long OPTIMAL_TIME = 1000000000 / TARGET_FPS;
 
 		while (gameRunning) {
