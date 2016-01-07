@@ -1,7 +1,9 @@
 import java.awt.Canvas;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferStrategy;
+import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -11,15 +13,24 @@ public class Physics2D extends Canvas {
 	public int fps;
 	public long lastFpsTime;
 	public boolean gameRunning = true;
+
+	// Fönstrets storlek i pixlar och meter
 	public static final int FWIDTH_PX = 800;
 	public static final int FHEIGHT_PX = 600;
-	public static final double FWIDTH_M = 0.2;
-	public static final double FHEIGHT_M = 0.15;
+	public static final double FWIDTH_M = 0.18;
+	public static final double FHEIGHT_M = 0.135;
 
-	// Skapar en boll enhet: (m)
-	public Ball b = new Ball(FWIDTH_M / 2, 0.10, 0.007);
+	// ArrayList som innehåller alla bollar
+	ArrayList<Ball> balls = new ArrayList<Ball>();
+	CreateBall cb = new CreateBall(balls);
 
 	public Physics2D() {
+		this.addMouseListener(cb);
+
+		// Skapar en boll med argumenten (x-pos, y-pos, x-hastighet radie, färg)
+		balls.add(new Ball(FWIDTH_M / 2, 0.1, 0.007, 0.05, Color.RED));
+		balls.add(new Ball(0.16, 0.07, 0.01, 0.05, Color.BLUE));
+
 		// Skapa en JFrame som ska innehålla programmet
 		JFrame container = new JFrame("2D Physics Java");
 
@@ -38,58 +49,47 @@ public class Physics2D extends Canvas {
 		container.setResizable(false);
 		container.setVisible(true);
 
-		// create the buffering strategy which will allow AWT
-		// to manage our accelerated graphics
+		// Skapar en bufferstrategi som renderar nästa frame i förväg
 		createBufferStrategy(2);
 		strategy = getBufferStrategy();
 	}
 
-	// Program-loop
+	// Loopa programmet
 	public void run() {
 		long lastLoopTime = System.nanoTime();
-		final int TARGET_FPS = 60;
+		final int TARGET_FPS = 10;
 		final long OPTIMAL_TIME = 1000000000 / TARGET_FPS;
 
-		// keep looping round til the game ends
 		while (gameRunning) {
 			long now = System.nanoTime();
 			double updateLength = now - lastLoopTime;
 			lastLoopTime = now;
 			double delta = updateLength / (OPTIMAL_TIME);
-
-			// Get hold of a graphics context for the accelerated
-			// surface and blank it out
 			Graphics2D g = (Graphics2D) strategy.getDrawGraphics();
 
 			// Rensar fönstret
 			g.clearRect(0, 0, FWIDTH_PX, FHEIGHT_PX);
 			g.drawRect(0, 0, FWIDTH_PX - 1, FHEIGHT_PX - 1);
 
-			// Uppdaterar bollens position och ritar den
-			b.updatePos(updateLength / 1000000000);
-
-			b.draw(g);
-
+			// Uppdaterar bollarnas positioner och ritar dom
+			for (int i = 0; i < balls.size(); i++) {
+				balls.get(i).updatePos(updateLength / 1000000000);
+				balls.get(i).draw(g);
+			}
 			g.dispose();
 			strategy.show();
 
-			// update the frame counter
+			// Uppdaterar FPS räknaren
 			lastFpsTime += updateLength;
 			fps++;
 
-			// update our FPS counter if a second has passed since
-			// we last recorded
+			// Uppdaterar FPS räknaren om en sekund har passerat
 			if (lastFpsTime >= 1000000000) {
 				lastFpsTime = 0;
 				fps = 0;
 			}
 
-			// we want each frame to take 10 milliseconds, to do this
-			// we've recorded when we started the frame. We add 10 milliseconds
-			// to this and then factor in the current time to give
-			// us our final value to wait for
-			// remember this is in ms, whereas our lastLoopTime etc. vars are in
-			// ns.
+			// Gör så att varje frame tar 10 millisekunder
 			try {
 				Thread.sleep((lastLoopTime - System.nanoTime() + OPTIMAL_TIME) / 1000000);
 			} catch (Exception e) {
@@ -100,6 +100,7 @@ public class Physics2D extends Canvas {
 	}
 
 	public static void main(String args[]) {
+		System.out.println(ConvertPos.xpToxm(100));
 		Physics2D p2d = new Physics2D();
 		p2d.run();
 	}

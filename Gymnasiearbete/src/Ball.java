@@ -3,19 +3,25 @@ import java.awt.Graphics2D;
 
 public class Ball {
 	double x, y, xVel, yVel, r;
+	// Tyngdacceleration (m/s^2)
+	double yAcc = -0.2;
+	// Färg
+	Color color = new Color(0);
 
 	// Konstruktor
-	public Ball(double x, double y, double r) {
+	public Ball(double x, double y, double r, double xVel, Color color) {
 		// Position (m)
 		this.x = x;
 		this.y = y;
 
 		// Hastighet (m/s)
-		this.xVel = 0;
+		this.xVel = xVel;
 		this.yVel = 0;
 
 		// Radie (m)
 		this.r = r;
+
+		this.color = color;
 	}
 
 	// Uppdaterar bollens position
@@ -26,32 +32,15 @@ public class Ball {
 			xVel = -xVel;
 		}
 
-		yVel = -0.2 * updateLength + yVel;
-
+		yVel = yAcc * updateLength + yVel;
 		x += xVel * updateLength;
 		y += yVel * updateLength;
 	}
 
-	// Konverterar en x-koordinat från meter till pixlar
-	public static int convertX(double xm) {
-		double xp = (Physics2D.FWIDTH_PX / Physics2D.FWIDTH_M) * xm;
-		return (int) xp;
-	}
-
-	// Konverterar en y-koordinat från meter till pixlar
-	public static int convertY(double ym) {
-		double yp = -((ym - Physics2D.FHEIGHT_M) / Physics2D.FHEIGHT_M) * Physics2D.FHEIGHT_PX;
-		return (int) yp;
-	}
-
 	// Ritar bollen
 	public void draw(Graphics2D g) {
-		g.setColor(Color.RED);
-		g.fillOval(convertX(x - r), convertY(y + r), convertX(2 * r), convertX(2 * r));
-		g.setColor(Color.BLACK);
-		g.drawString("x-pos (m): " + x, 20, 500);
-		g.drawString("y-pos (m): " + y, 20, 525);
-		g.drawString("xVel (m/s): " + xVel, 20, 550);
-		g.drawString("yVel (m/s): " + yVel, 20, 575);
+		g.setColor(color);
+		g.fillOval(ConvertPos.xmToxp(x - r), ConvertPos.ymToyp(y + r), ConvertPos.xmToxp(2 * r),
+				ConvertPos.xmToxp(2 * r));
 	}
 }
